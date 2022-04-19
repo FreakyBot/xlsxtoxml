@@ -2,6 +2,7 @@ from functools import wraps
 
 import et as et
 import lxml
+import pandas
 import pandas as pd
 from lxml import etree as et
 from lxml.etree import CDATA
@@ -27,19 +28,19 @@ for row in raw_data.iterrows():
     Column_heading_13 = et.SubElement(root_tags, 'categories')
 
     # The values inside the [] are the raw file column headings.(SECTION 2)
-    Column_heading_1.text = CDATA(str(row[1]['sku']))
-    Column_heading_2.text = CDATA(str(row[1]['product_url']))
-    Column_heading_3.text = CDATA(str(row[1]['name_ar']))
-    Column_heading_4.text = CDATA(str(row[1]['image_url']))
-    Column_heading_5.text = CDATA(str(row[1]['price']))
-    Column_heading_6.text = CDATA(str(row[1]['color']))
-    Column_heading_7.text = CDATA(str(row[1]['size']))
-    Column_heading_8.text = CDATA(str(row[1]['age']))
-    Column_heading_9.text = CDATA(str(row[1]['design']))
-    Column_heading_10.text = CDATA(str(row[1]['number of paces']))
-    Column_heading_11.text = CDATA(str(row[1]['Package']))
-    Column_heading_12.text = CDATA(str(row[1]['description_ar']))
-    Column_heading_13.text = CDATA(str(row[1]['categories']))
+    Column_heading_1.text = CDATA(str(row[1]['sku']).replace(r'nan', ''))
+    Column_heading_2.text = CDATA(str(row[1]['product_url']).replace(r'nan', ''))
+    Column_heading_3.text = CDATA(str(row[1]['name_ar']).replace(r'nan', ''))
+    Column_heading_4.text = CDATA(str(row[1]['image_url']).replace(r'nan', ''))
+    Column_heading_5.text = CDATA(str(row[1]['price']).replace(r'nan', ''))
+    Column_heading_6.text = CDATA(str(row[1]['color']).replace(r'nan', ''))
+    Column_heading_7.text = CDATA(str(row[1]['size']).replace(r'nan', ''))
+    Column_heading_8.text = CDATA(str(row[1]['age']).replace(r'nan', ''))
+    Column_heading_9.text = CDATA(str(row[1]['design']).replace(r'nan', ''))
+    Column_heading_10.text = CDATA(str(row[1]['number of paces']).replace(r'nan', ''))
+    Column_heading_11.text = CDATA(str(row[1]['Package']).replace(r'nan', ''))
+    Column_heading_12.text = CDATA(str(row[1]['description_ar']).replace(r'nan', ''))
+    Column_heading_13.text = CDATA(str(row[1]['categories']).replace(r'nan', ''))
 
 
 tree = et.ElementTree(root)
