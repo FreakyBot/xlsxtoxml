@@ -1,6 +1,6 @@
-import logging
 import sys
 import tempfile
+from datetime import datetime
 from ftplib import FTP
 
 import et as et
@@ -12,34 +12,36 @@ from pandas.errors import EmptyDataError
 
 
 def main():
-    # Configure the logging system
-    # logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s')
-    logging.basicConfig(filename='example.log', filemode='w', level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S:%MS')
-
     url = "https://drive.google.com/uc?export=download&id=1ZyE-VPoYQZgIlbQIoVkFD4VVXC-NpUbO"
     try:
-        logging.info('Start downloading file')
+        print(datetime.now(), 'Start downloading file')
         r = requests.get(url)
-    except:
-        logging.error("Exception occurred while download", exc_info=True)
-
-    open("temp.xlsx", "wb").write(r.content)
+    except EmptyDataError as e:
+        print(e)
+    try:
+        print(datetime.now(), 'Open xlsx file')
+        open("temp.xlsx", "wb").write(r.content)
+    except Exception as e:
+        print(e)
 
     try:
+        print(datetime.now(), 'Pandas read')
         raw_data = pd.read_excel("temp.xlsx")
     except KeyError as e:
-        logging.error("Exception occurred", exc_info=True)
-        sys.exit(1)
+        print(e)
     except TypeError as e:
-        logging.error("Exception occurred", exc_info=True)
+        print(e)
     except FileNotFoundError as e:
-        logging.error("Exception occurred", exc_info=True)
-    except EmptyDataError:
-        logging.error("Exception occurred", exc_info=True)
-
-    raw_data['First Link'] = raw_data['image_url'].str.split(',', expand=True)[0]
-    raw_data['Second Link'] = raw_data['image_url'].str.split(',', expand=True)[1]
-    raw_data['Third Link'] = raw_data['image_url'].str.split(',', expand=True)[2]
+        print(e)
+    except EmptyDataError as e:
+        print(e)
+    try:
+        raw_data['First Link'] = raw_data['image_url'].str.split(',', expand=True)[0]
+        raw_data['Second Link'] = raw_data['image_url'].str.split(',', expand=True)[1]
+        raw_data['Third Link'] = raw_data['image_url'].str.split(',', expand=True)[2]
+        print(datetime.now(), 'Splitting img_url')
+    except Exception as e:
+        print(e)
 
     root = et.Element('document')
 
@@ -79,26 +81,35 @@ def main():
             column_heading_11.text = CDATA(str(row[1]['Package']).replace(r'nan', ''))
             column_heading_12.text = CDATA(str(row[1]['description_ar']).replace(r'nan', '').replace(r'&nbsp', ' '))
             column_heading_13.text = CDATA(str(row[1]['categories']).replace(r'🔥', '').replace(r'nan', ''))
-    except:
-        logging.error("Exception occurred", exc_info=True)
-    logging.info('Finished making file')
+        print(datetime.now(), 'Finished creating xml fields')
+    except IOError as e:
+        print("I/O error: {0}".format(e))
+    except ValueError:
+        print("Could not convert data to an integer.")
+    except Exception as e:
+        print("Unexpected error:", e)
 
     tree = et.ElementTree(root)
     et.indent(tree, space="\t", level=0)
 
     # creating tmp file
     try:
-        logging.info('Creating tmp file')
+        print(datetime.now(), 'Creating tmp file')
         with tempfile.NamedTemporaryFile() as tmp:
             tmp.name = "feed.xml"
     except:
-        logging.error("Exception occurred", exc_info=True)
+        print('Cannot create tmp file')
 
+    print(datetime.now(), 'Writing to tmp file')
     # writing to tmp
     tree.write(tmp.name, encoding="utf-8")
 
-    with FTP("files.salesmanago.pl", "reefi.me", "27NwhTJDQ*twBAKY") as ftp, open(tmp.name, "rb") as file:
-        ftp.storbinary(f"STOR {file.name}", file)
+    print(datetime.now(), 'Uploading tmp file to ftp')
+    try:
+        with FTP("adress", "username", "password") as ftp, open(tmp.name, "rb") as file:
+            ftp.storbinary(f"STOR {file.name}", file)
+    except Exception as e:
+        print(e)
 
 
 if __name__ == '__main__':
