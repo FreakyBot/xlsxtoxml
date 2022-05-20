@@ -12,29 +12,37 @@ from pandas.errors import EmptyDataError
 
 
 def main():
-    url = "https://drive.google.com/uc?export=download&id=1ZyE-VPoYQZgIlbQIoVkFD4VVXC-NpUbO"
+    url = "link"
     try:
         print(datetime.now(), 'Start downloading file')
         r = requests.get(url)
-    except EmptyDataError as e:
+        print(datetime.now(), 'Downloading file complete')
+    except requests.exceptions.RequestException as e:
         print(e)
+        sys.exit(1)
+
     try:
         print(datetime.now(), 'Open xlsx file')
         open("temp.xlsx", "wb").write(r.content)
     except Exception as e:
         print(e)
+        sys.exit(1)
 
     try:
         print(datetime.now(), 'Pandas read')
         raw_data = pd.read_excel("temp.xlsx")
     except KeyError as e:
         print(e)
+        sys.exit(1)
     except TypeError as e:
         print(e)
+        sys.exit(1)
     except FileNotFoundError as e:
         print(e)
+        sys.exit(1)
     except EmptyDataError as e:
         print(e)
+        sys.exit(1)
     try:
         raw_data['First Link'] = raw_data['image_url'].str.split(',', expand=True)[0]
         raw_data['Second Link'] = raw_data['image_url'].str.split(',', expand=True)[1]
@@ -87,7 +95,7 @@ def main():
     except ValueError:
         print("Could not convert data to an integer.")
     except Exception as e:
-        print("Unexpected error:", e)
+        print("Unexpected error: {0}".format(e))
 
     tree = et.ElementTree(root)
     et.indent(tree, space="\t", level=0)
@@ -97,8 +105,8 @@ def main():
         print(datetime.now(), 'Creating tmp file')
         with tempfile.NamedTemporaryFile() as tmp:
             tmp.name = "feed.xml"
-    except:
-        print('Cannot create tmp file')
+    except Exception as e:
+        print('Cannot create tmp file', str(e))
 
     print(datetime.now(), 'Writing to tmp file')
     # writing to tmp
@@ -106,8 +114,9 @@ def main():
 
     print(datetime.now(), 'Uploading tmp file to ftp')
     try:
-        with FTP("adress", "username", "password") as ftp, open(tmp.name, "rb") as file:
+        with FTP("host", "user", "pass") as ftp, open(tmp.name, "rb") as file:
             ftp.storbinary(f"STOR {file.name}", file)
+            print(datetime.now(), "Uploading done")
     except Exception as e:
         print(e)
 
