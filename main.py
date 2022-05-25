@@ -13,6 +13,12 @@ def print_msg(message):
     print(datetime.now(), message)
 
 
+URL =
+USER =
+HOST =
+PASSWORD =
+
+
 def main():
     print_msg('Start downloading file')
     r = requests.get(URL)
